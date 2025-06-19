@@ -33,4 +33,4 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hw-solo:${{ env.SHA_SHORT }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/evan-dexcom-client:${{ env.SHA_SHORT }}
