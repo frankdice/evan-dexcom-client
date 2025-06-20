@@ -15,11 +15,18 @@ cache.init_app(app)
 @app.route("/v1/bloodsugar")
 def bloodsugar():
     bloodsugar = get_bloodsugar()
+    
+    # Make the esp32 process easier, calculate how long it needs to sleep before it pulls again
+    now = datetime.now(timezone.utc)
+    delta_seconds = (now - bloodsugar.datetime).total_seconds()
+    seconds_remaining =  300 - delta_seconds  # 5 minute delta
+    
     json_response = {
         "value": bloodsugar.value,
         "datetime": bloodsugar.datetime.isoformat(),
         "trend": bloodsugar.trend,
         "trend_arrow": bloodsugar.trend_arrow,
+        "update_seconds_remaining": seconds_remaining,
         "disable_alerting": False,
     }
     # Return if it's in the alerting threshold timeframe
