@@ -16,6 +16,9 @@ cache.init_app(app)
 def bloodsugar():
     bloodsugar = get_bloodsugar()
     
+    if bloodsugar is None:
+        return jsonify({"error": "No glucose reading available"}), 500
+
     # Make the esp32 process easier, calculate how long it needs to sleep before it pulls again
     now = datetime.now(timezone.utc)
     delta_seconds = (now - bloodsugar.datetime).total_seconds()
@@ -26,7 +29,7 @@ def bloodsugar():
         "datetime": bloodsugar.datetime.isoformat(),
         "trend": bloodsugar.trend,
         "trend_arrow": bloodsugar.trend_arrow,
-        "update_seconds_remaining": seconds_remaining,
+        "update_seconds_remaining": round(seconds_remaining),
         "disable_alerting": False,
     }
     # Return if it's in the alerting threshold timeframe
@@ -55,7 +58,11 @@ def get_bloodsugar():
     
     # Cache is empty or too old, fetch new data
     dexcom = get_dexcom()
+    
     glucose_reading = dexcom.get_current_glucose_reading()
+    if glucose_reading is None:
+        print("No glucose reading available.")
+        return None
 
     if 10 <= glucose_reading.value <= 1000:
         cache.set('glucose_reading', glucose_reading)
